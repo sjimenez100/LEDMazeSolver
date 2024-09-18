@@ -2,11 +2,10 @@
 #define MAZE_H
 
 #include <ArduinoSTL.h>
-#include <Misc.h>
 #include <stack>
 #include <array>
-#include <iostream>
-#include <bitset>
+//#include <bitset>
+#include "Misc.h"
 
 using namespace std;
 
@@ -18,7 +17,7 @@ private:
   bool inverted = false;
 
   // returns 1, 2, 3, 4 correspining to N, E, S, W or 0 if there are no unvisited neighbours
-  uint8_t checkNeighbours(array<int, 2> currentCell, T visited[]) {
+  uint8_t checkNeighbours(std::array<int, 2> currentCell, T visited[]) {
     uint8_t row = currentCell[0];
     uint8_t col = currentCell[1];
 
@@ -65,11 +64,11 @@ private:
     return 0;
   }
 
-  void DFS(T grid[], array<int, 2> initialCell) {
+  void DFS(T grid[], std::array<int, 2> initialCell) {
 
-    array<array<int, 2>, 4> neighbourOffsets = { { -2, 0 }, { 0, 2 }, { 2, 0 }, { 0, -2 } };
+    std::array<std::array<int, 2>, 4> neighbourOffsets = { { -2, 0 }, { 0, 2 }, { 2, 0 }, { 0, -2 } };
     T visited[rows]{};
-    stack<array<int, 2>> cellStack;
+    std::stack<std::array<int, 2>> cellStack;
 
     visited[initialCell[0]] = 1 << (columns - 1) - initialCell[1];
     cellStack.push(initialCell);
@@ -78,7 +77,7 @@ private:
       // Serial.println("-----------------");
       // Serial.println("-----------------");
 
-      array<int, 2> currentCell = cellStack.top();
+      std::array<int, 2> currentCell = cellStack.top();
       cellStack.pop();
 
       //printVec(currentCell, "Current Cell");
@@ -91,16 +90,16 @@ private:
       if (neighbourState) {
         cellStack.push(currentCell);
 
-        array<int, 2> offset = neighbourOffsets[neighbourState - 1];
+        std::array<int, 2> offset = neighbourOffsets[neighbourState - 1];
         //printVec(offset, "offset");
 
-        array<int, 2> neighbour = add(currentCell, offset);
+        std::array<int, 2> neighbour = add(currentCell, offset);
         //printVec(neighbour, "neighbour");
 
-        array<int, 2> woffset = { (int)(offset[0] / 2), (int)(offset[1] / 2) };
+        std::array<int, 2> woffset = { (int)(offset[0] / 2), (int)(offset[1] / 2) };
         //printVec(woffset, "woffset");
 
-        array<int, 2> wall = add(currentCell, woffset);
+        std::array<int, 2> wall = add(currentCell, woffset);
         //printVec(wall, "wall");
 
         grid[wall[0]] = grid[wall[0]] | 1 << (columns - 1) - wall[1];
@@ -176,7 +175,7 @@ public:
   void generate(bool invert=true) {
 
     defaultPattern();
-    array<int, 2> initialCell = randomInitialCell();
+    std::array<int, 2> initialCell = randomInitialCell();
     DFS(grid, initialCell);
 
     if(invert){negateGrid();}

@@ -2,10 +2,10 @@
 #define MISC_H
 
 #include <ArduinoSTL.h>
-#include <stack>
 #include <array>
 
 using namespace std;
+
 
 template<typename X, typename U> 
 struct is_same{
@@ -17,7 +17,7 @@ struct is_same<X, X>{
   static const bool value = true;
 };
 
-static array<int, 2> add(array<int, 2> v1, array<int, 2> v2) {
+static std::array<int, 2> add(std::array<int, 2> v1, std::array<int, 2> v2) {
   array<int, 2> vn = { v1[0] + v2[0], v1[1] + v2[1] };
   return vn;
 }
@@ -43,7 +43,7 @@ static int compare(const void* a, const void* b) {
 }
 
 template<typename T, typename F>
-static arrayMap(T rawArray[], int length, F func){
+static void arrayMap(T rawArray[], int length, F func){
   for(int i = 0; i < length; i++){
     rawArray[i] = func(i, rawArray);
   }
