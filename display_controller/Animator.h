@@ -62,7 +62,6 @@ public:
 
       if(index == length-1)
       {
-        
         // set value of current off
         base[rc] = base[rc] & ~(1 << (columns - 1) - cc);
 

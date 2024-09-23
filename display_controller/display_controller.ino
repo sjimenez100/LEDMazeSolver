@@ -2,11 +2,11 @@
 #include "Animator.h"
 #include "Maze.h"
 #include "Test.h"
+#include "PathFinding.h"
 
 #include <ArduinoSTL.h>
 #include <array>
 #include <vector>
-
 
 using namespace std;
 
@@ -17,42 +17,38 @@ const uint8_t clockPin = 10;
 const uint8_t togglePin = 2;
 bool toggle = false;
 
-Display<uint8_t> display(dataPin, clockPin, latchPin, 8);
-Maze<uint8_t> maze(8);
-vector<array<int, 2>> positions;
-Animator<uint8_t> animator(display, 1000, true);
+Display<uint8_t> display(dataPin, clockPin, latchPin, 16);
+Maze<uint8_t> maze(16);
+Animator<uint8_t> animator(display, 2000, true);
 
 bool a = true;
 void setup() {
 
-  pinMode(togglePin, INPUT);
-
   Serial.begin(9600);
+  delay(100);
   Serial.println();
+  
+  pinMode(togglePin, INPUT);
 
   uint8_t seed = analogRead(0);
   randomSeed(seed);
 
   maze.generate();
   display.initialize();
-  animator.initialize(maze.grid, positions);
-  for(int i=0; i<8; i++){
-    Serial.println(maze.grid[i]);
-  }
 
-  positions.push_back({0, 0});
-  positions.push_back({1, 1});
-  positions.push_back({2, 2});
-  positions.push_back({3, 3});
-  positions.push_back({4, 3});
-  positions.push_back({5, 2});
-  positions.push_back({6, 1});
-  positions.push_back({7, 0});
+  array<int, 2> startPosition = {0, 0};
+  array<int, 2> targetPosition = {14, 6};
 
-  
+  Serial.println("TEST1");
+  vector<array<int, 2>> path = AStar<uint8_t, 16, 8>(maze.grid, startPosition, targetPosition);
+  Serial.println(path.size());
+  animator.initialize(maze.grid, path);
+
+  display.refresh(maze.grid);
+  maze.printGrid();
 }
 
-void loop() {
 
-  
+void loop() {
+    animator.animate();
 }

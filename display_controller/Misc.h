@@ -6,7 +6,6 @@
 
 using namespace std;
 
-
 template<typename X, typename U> 
 struct is_same{
   static const bool value = false;
