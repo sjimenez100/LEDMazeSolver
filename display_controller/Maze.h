@@ -162,13 +162,6 @@ public:
   const uint8_t columns = sizeof(T) * 8;
   
   Maze(uint8_t rows) : rows(rows) {
-
-    static_assert(is_same<T, uint8_t>::value || is_same<T, uint16_t>::value || is_same<T, uint32_t>::value 
-    || is_same<T, uint64_t>::value, "grid elements must be unsigned integers");
-
-    assert(rows > 7, "Numerical Error (Maze): rows must be greater than 7");
-
-    // add to heap
     grid = new T[rows]{};
   }
 

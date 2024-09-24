@@ -15,7 +15,7 @@ private:
   int index = 0;
   T* base; 
   Display<uint8_t> display;
-  std::vector<array<int, 2>> positions;
+  std::vector<array<uint8_t, 2>> positions;
   unsigned long duration;
   int length;
   int columns;
@@ -29,7 +29,7 @@ public:
     
   }
 
-  void initialize(T base[], vector<array<int, 2>> positions){
+  void initialize(T base[], const vector<array<uint8_t, 2>>& positions){
     this->base = base;
     this->positions = positions;
     length = positions.size();
@@ -43,17 +43,17 @@ public:
     auto func = [=](){
 
       if(index){
-        array<int, 2> previousPosition = positions[index-1];
-        int rp = previousPosition[0];
-        int cp = previousPosition[1];
+        array<uint8_t, 2>& previousPosition = positions[index-1];
+        uint8_t rp = previousPosition[0];
+        uint8_t cp = previousPosition[1];
 
         // set value of previous off
         base[rp] = base[rp] & ~(1 << (columns - 1) - cp);
       }
 
-      array<int, 2> currentPosition = positions[index];
-      int rc = currentPosition[0];
-      int cc = currentPosition[1];
+      array<uint8_t, 2>& currentPosition = positions[index];
+      uint8_t rc = currentPosition[0];
+      uint8_t cc = currentPosition[1];
 
       // set value of current on
       base[rc] = base[rc] | 1 << (columns - 1) - cc;

@@ -77,20 +77,15 @@ public:
     digitalWrite(SDI_PIN, LOW);
     digitalWrite(LE_PIN, LOW);
 
-    //sendCommand(0x0f, 0x00);  // normal operation (no test)
-    sendCommand(0b00001111, 0b00000000, 255);
+    sendCommand(0x0f, 0x00);  // normal operation (no test)
 
-    //sendCommand(0x0c, 0x01);  // normal operations
-    sendCommand(0b00001100, 0b00000001, 255);
+    sendCommand(0x0c, 0x01);  // normal operations
 
-    //sendCommand(0x0b, 0x07);  // display all digits
-    sendCommand(0b00001011, 0b00000111, 255);
+    sendCommand(0x0b, 0x07);  // display all digits
 
-    //sendCommand(0x09, 0x00);  // no decode
-    sendCommand(0b00001001, 0b00000000, 255);
+    sendCommand(0x09, 0x00);  // no decode
 
-    //sendCommand(0x0a, 0x09);  // duty cycle
-    sendCommand(0b00001010, 0x0E, 255);
+    sendCommand(0x0a, 0x09);  // duty cycle
 
     clear();
   }

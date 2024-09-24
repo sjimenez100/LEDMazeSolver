@@ -7,36 +7,36 @@
 #include <array>
 
 struct Node {
-  array<int, 2> position;
+  array<uint8_t, 2> position;
   Node* parent = nullptr;
   bool traversable = false;
 
-  int fCost;
-  int gCost = 1000;
-  int hCost;
+  uint8_t fCost;
+  uint8_t gCost = 255;
+  uint8_t hCost;
 
   bool operator==(const Node& other) const {
       return position[0] == other.position[0] && position[1] == other.position[1];
   }
 };
 
-template<int rows, int columns>
-vector<Node*> GetNeighbours(Node& currentNode, array<array<Node, columns>, rows>& nodeGrid){
+template<const uint8_t rows, const uint8_t columns>
+vector<Node*> GetNeighbours(Node& currentNode, const array<array<Node, columns>, rows>& nodeGrid){
 
   vector<Node*> neighbours;
 
-  int row = currentNode.position[0];
-  int column = currentNode.position[1];
+  uint8_t row = currentNode.position[0];
+  uint8_t column = currentNode.position[1];
 
   for(int r = -1; r < 2; r++){
     for(int c = -1; c < 2; c++){
 
-      if((r == 0) && (c == 0)){
+      if((r == 0 && c == 0) || r * c != 0){
         continue;
       }
 
-      int selRow = row + r;
-      int selCol = column + c;
+      uint8_t selRow = row + r;
+      uint8_t selCol = column + c;
        
       if(selRow < 0 || selRow >= rows || selCol < 0 || selCol >= columns){
         continue;
@@ -49,13 +49,11 @@ vector<Node*> GetNeighbours(Node& currentNode, array<array<Node, columns>, rows>
   return neighbours;
 }
 
-template<typename T, int rows, int columns>
-vector<array<int, 2>> AStar(T grid[], array<int, 2> startPosition, array<int, 2> targetPosition){
-  Serial.println("TEST2");
+template<typename T, const uint8_t rows, const uint8_t columns>
+vector<array<uint8_t, 2>> AStar(T grid[], array<uint8_t, 2> startPosition, array<uint8_t, 2> targetPosition){
 
   array<array<Node, columns>, rows> nodeGrid;
 
-  Serial.println("TEST3");
 
   for(int r = 0; r < rows; r++){
     
@@ -68,7 +66,6 @@ vector<array<int, 2>> AStar(T grid[], array<int, 2> startPosition, array<int, 2>
     }
   }
 
-  Serial.println("TEST4");
   vector<Node*> openSet;
   vector<Node*> closedSet;
 
@@ -85,12 +82,11 @@ vector<array<int, 2>> AStar(T grid[], array<int, 2> startPosition, array<int, 2>
   openSet.push_back(&startNode);
   Node* currentNode = &startNode;
 
-  Serial.println("TEST5");
   
-  int i = 0;
-  while(!openSet.empty() && i < 500){
+  uint8_t i = 0;
+  while(!openSet.empty() && i < 255){
 
-    int currentNodeIndex = GetLowestfCostNodeIndex(openSet);
+    uint8_t currentNodeIndex = GetLowestfCostNodeIndex(openSet);
 
     currentNode = openSet[currentNodeIndex];
     openSet.erase(openSet.begin() + currentNodeIndex); 
@@ -111,7 +107,7 @@ vector<array<int, 2>> AStar(T grid[], array<int, 2> startPosition, array<int, 2>
         continue;
       }
 
-      int newPathToNeighbour = currentNode->gCost + GetDistance(*currentNode, *neighbour);
+      uint8_t newPathToNeighbour = currentNode->gCost + GetDistance(*currentNode, *neighbour);
 
       if(neighbour->gCost > newPathToNeighbour || !inSet(openSet, *neighbour)){
 
@@ -134,7 +130,7 @@ vector<array<int, 2>> AStar(T grid[], array<int, 2> startPosition, array<int, 2>
   return {};
 }
 
-int GetDistance(Node& nodeA, Node& nodeB){
+int GetDistance(const Node& nodeA, const Node& nodeB){
   int distX = abs(nodeA.position[1] - nodeB.position[1]);
   int distY = abs(nodeA.position[0] - nodeB.position[0]);
 
@@ -146,8 +142,8 @@ int GetDistance(Node& nodeA, Node& nodeB){
 
 }
 
-int GetLowestfCostNodeIndex(vector<Node*>& openSet) {
-  int index = 0;
+uint8_t GetLowestfCostNodeIndex(const vector<Node*>& openSet) {
+  uint8_t index = 0;
   Node* lowestNode = openSet[0];
 
   for (int i = 1; i < openSet.size(); i++) {
@@ -164,8 +160,8 @@ int GetLowestfCostNodeIndex(vector<Node*>& openSet) {
 }
 
 
-vector<array<int, 2>> BuildPath(Node& targetNode) {
-  vector<array<int, 2>> path;
+vector<array<uint8_t, 2>> BuildPath(Node& targetNode) {
+  vector<array<uint8_t, 2>> path;
   Node& currentNode = targetNode;
   path.push_back(currentNode.position);
 
@@ -178,7 +174,7 @@ vector<array<int, 2>> BuildPath(Node& targetNode) {
   return path;
 }
 
-int inSet(vector<Node*>& set, Node& compNode){
+bool inSet(const vector<Node*>& set, const Node& compNode){
 
   for(int n = 0; n < set.size(); n++){
     Node& node = *set[n];

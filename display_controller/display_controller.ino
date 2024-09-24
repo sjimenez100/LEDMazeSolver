@@ -17,38 +17,40 @@ const uint8_t clockPin = 10;
 const uint8_t togglePin = 2;
 bool toggle = false;
 
-Display<uint8_t> display(dataPin, clockPin, latchPin, 16);
-Maze<uint8_t> maze(16);
-Animator<uint8_t> animator(display, 2000, true);
+Display<uint8_t> display(dataPin, clockPin, latchPin, 8);
+Maze<uint8_t> maze(8);
+Animator<uint8_t> animator(display, 2000, false);
 
-bool a = true;
+
+const array<uint8_t, 2> startPosition = {0, 0};
+const array<uint8_t, 2> targetPosition = {6, 6};
+
 void setup() {
-
   Serial.begin(9600);
-  delay(100);
-  Serial.println();
   
   pinMode(togglePin, INPUT);
 
   uint8_t seed = analogRead(0);
   randomSeed(seed);
 
-  maze.generate();
   display.initialize();
-
-  array<int, 2> startPosition = {0, 0};
-  array<int, 2> targetPosition = {14, 6};
-
-  Serial.println("TEST1");
-  vector<array<int, 2>> path = AStar<uint8_t, 16, 8>(maze.grid, startPosition, targetPosition);
-  Serial.println(path.size());
-  animator.initialize(maze.grid, path);
-
+  maze.generate();
   display.refresh(maze.grid);
-  maze.printGrid();
+
+
+  const vector<array<uint8_t, 2>>& path = AStar<uint8_t, 8, 8>(maze.grid, startPosition, targetPosition);
+  animator.initialize(maze.grid, path);
 }
 
 
 void loop() {
-    animator.animate();
+
+  bool animationCompleted = animator.animate();
+
+  if(animationCompleted){
+    maze.generate();
+    const vector<array<uint8_t, 2>>& path = AStar<uint8_t, 8, 8>(maze.grid, startPosition, targetPosition);
+    animator.initialize(maze.grid, path);
+  }
+  
 }
