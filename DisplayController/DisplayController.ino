@@ -17,7 +17,7 @@ const std::array<uint8_t, 2> targetPosition = { 14, 15 };
 
 MAX7219<uint16_t> display(dataPin, clockPin, latchPin, 16);
 Maze<uint16_t> maze(16);
-Animator<uint16_t> animator(display, 3250, false);
+Animator<uint16_t> animator(display, 3500, false);
 
 void setup() {
   Serial.begin(9600);
