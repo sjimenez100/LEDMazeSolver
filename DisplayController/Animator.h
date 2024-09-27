@@ -2,8 +2,7 @@
 #define ANIMATOR_H
 
 #include "CoRoutine.h"
-#include "Display.h"
-#include <ArduinoSTL.h>
+#include "MAX7219.h"
 #include <array>
 
 using namespace std;
@@ -13,8 +12,8 @@ class Animator {
 
 private:
   int index = 0;
-  T* base; 
-  Display<uint8_t> display;
+  T* base;
+  MAX7219<T> display;
   std::vector<array<uint8_t, 2>> positions;
   unsigned long duration;
   int length;
@@ -24,26 +23,24 @@ private:
   bool loop;
 
 public:
-  Animator(Display<uint8_t> display, unsigned long duration, bool loop=false) : 
-   display(display), duration(duration), loop(loop) {
-    
+  Animator(MAX7219<T> display, unsigned long duration, bool loop = false)
+    : display(display), duration(duration), loop(loop) {
   }
 
-  void initialize(T base[], const vector<array<uint8_t, 2>>& positions){
+  void initialize(T base[], const vector<array<uint8_t, 2>>& positions) {
     this->base = base;
     this->positions = positions;
     length = positions.size();
     columns = sizeof(T) * 8;
-    period = duration/length;
+    period = duration / length;
     routine.period = period;
   }
 
-  bool animate(){
+  bool animate() {
 
-    auto func = [=](){
-
-      if(index){
-        array<uint8_t, 2>& previousPosition = positions[index-1];
+    auto func = [=]() {
+      if (index) {
+        array<uint8_t, 2>& previousPosition = positions[index - 1];
         uint8_t rp = previousPosition[0];
         uint8_t cp = previousPosition[1];
 
@@ -57,11 +54,10 @@ public:
 
       // set value of current on
       base[rc] = base[rc] | 1 << (columns - 1) - cc;
-      
+
       display.refresh(base);
 
-      if(index == length-1)
-      {
+      if (index == length - 1) {
         // set value of current off
         base[rc] = base[rc] & ~(1 << (columns - 1) - cc);
 
@@ -75,7 +71,6 @@ public:
 
     return routine.execute(func);
   }
-
 };
 
 #endif

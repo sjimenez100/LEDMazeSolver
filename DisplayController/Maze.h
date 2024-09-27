@@ -1,10 +1,8 @@
 #ifndef MAZE_H
 #define MAZE_H
 
-#include <ArduinoSTL.h>
+//#include <StandardCplusplus.h>
 #include <stack>
-#include <array>
-//#include <bitset>+
 #include "Misc.h"
 
 using namespace std;
@@ -21,44 +19,33 @@ private:
     uint8_t row = currentCell[0];
     uint8_t col = currentCell[1];
 
-    bool allVisited = true;
-    uint8_t unvisitedStates[4]{};
+    vector<int> unvisitedStates;
 
     if (row >= 2) {
       if (!(visited[row - 2] & (1 << (columns - 1) - col))) {
-        unvisitedStates[0] = 1;
-        allVisited = false;
+        unvisitedStates.push_back(1);
       }
     }
 
     if (col <= columns - 3) {
       if (!(visited[row] & (1 << (columns - 1) - col - 2))) {
-        unvisitedStates[1] = 2;
-        allVisited = false;
+        unvisitedStates.push_back(2);
       }
     }
     if (row <= rows - 3) {
       if (!(visited[row + 2] & (1 << (columns - 1) - col))) {
-        unvisitedStates[2] = 3;
-        allVisited = false;
+        unvisitedStates.push_back(3);
       }
     }
 
     if (col >= 2) {
       if (!(visited[row] & (1 << (columns - 1) - col + 2))) {
-        unvisitedStates[3] = 4;
-        allVisited = false;
+        unvisitedStates.push_back(4);
       }
     }
 
-    if (!allVisited) {
-      qsort(unvisitedStates, 4, sizeof(uint8_t), compare);
-
-      for (int i = 0; i < 4; i++) {
-        if (unvisitedStates[i]) {
-          return unvisitedStates[random(i, 4)];
-        }
-      }
+    if (!unvisitedStates.empty()) {
+      return unvisitedStates[random(0, unvisitedStates.size())];
     }
 
     return 0;
@@ -66,7 +53,12 @@ private:
 
   void DFS(T grid[], std::array<int, 2> initialCell) {
 
-    std::array<std::array<int, 2>, 4> neighbourOffsets = { { -2, 0 }, { 0, 2 }, { 2, 0 }, { 0, -2 } };
+    vector<array<int, 2>> neighbourOffsets;
+    neighbourOffsets.push_back({ -2, 0 });
+    neighbourOffsets.push_back({ 0, 2 });
+    neighbourOffsets.push_back({ 2, 0 });
+    neighbourOffsets.push_back({ 0, -2 });
+
     T visited[rows]{};
     std::stack<std::array<int, 2>> cellStack;
 
@@ -111,7 +103,7 @@ private:
     }
   }
 
-  array<int, 2> randomInitialCell() {
+  std::array<int, 2> randomInitialCell() {
 
     uint8_t evenRowIndex[rows / 2]{};
     uint8_t evenColumnIndex[columns / 2]{};
@@ -130,54 +122,67 @@ private:
     int r = evenRowIndex[random(rows / 2)];
     int c = evenColumnIndex[random(columns / 2)];
 
-    return array<int, 2>{ r, c };
+    return std::array<int, 2>{ r, c };
   }
 
   void defaultPattern() {
 
     uint64_t slice = 0b1010101010101010101010101010101010101010101010101010101010101010;
 
-    auto func = [slice](int i, T grid[]){return (i % 2 == 0 ? (T)slice : 0);};
+    auto func = [slice](int i, T grid[]) {
+      return (i % 2 == 0 ? (T)slice : 0);
+    };
     arrayMap(grid, rows, func);
   }
 
-  void clearGrid(){
+  void clearGrid() {
 
-    auto func = [](int i, T grid[]){return 0;};
+    auto func = [](int i, T grid[]) {
+      return 0;
+    };
     arrayMap(grid, rows, func);
   }
 
-  void negateGrid(){
+  void negateGrid() {
 
-    auto func = [](int i, T grid[]){return ~grid[i];};
+    auto func = [](int i, T grid[]) {
+      return ~grid[i];
+    };
     arrayMap(grid, rows, func);
     inverted = !inverted;
   }
-  
+
+  void pokeHole(int r, int c) {
+    grid[r] = grid[r] & ~(1 << (columns - 1) - c);
+  }
+
 
 public:
 
   T* grid;
   const uint8_t rows;
   const uint8_t columns = sizeof(T) * 8;
-  
-  Maze(uint8_t rows) : rows(rows) {
+
+  Maze(uint8_t rows)
+    : rows(rows) {
     grid = new T[rows]{};
   }
 
-  void generate(bool invert=true) {
+  void generate(bool invert = true) {
 
     defaultPattern();
     std::array<int, 2> initialCell = randomInitialCell();
     DFS(grid, initialCell);
 
-    if(invert){negateGrid();}
-
+    if (invert) { negateGrid(); }
+    pokeHole(rows - 2, columns - 1);
   }
 
-  static void printGrid(T grid[], uint8_t rows, uint8_t columns, bool invert = false)  {
-    
-    auto invf = [](bool par, bool res){return par ? !res : res;};
+  static void printGrid(T grid[], uint8_t rows, uint8_t columns, bool invert = false) {
+
+    auto invf = [](bool par, bool res) {
+      return par ? !res : res;
+    };
 
     Serial.println();
 
@@ -185,7 +190,7 @@ public:
       Serial.print("Row ");
       Serial.print(i);
       Serial.print(": ");
-      
+
       for (int j = columns - 1; j >= 0; j--) {
         Serial.print(invf(invert, (bool)(grid[i] & 1 << j)) ? "X" : "O");
         Serial.print(" ");
@@ -193,19 +198,17 @@ public:
 
       Serial.println();
     }
-
-  } 
+  }
 
   void printGrid() const {
     // don't pass in inverted since the grid will be negated with it's parity
     printGrid(grid, rows, columns, false);
-  } 
+  }
 
   ~Maze() {
 
     delete[] grid;
   }
-
 };
 
 #endif
